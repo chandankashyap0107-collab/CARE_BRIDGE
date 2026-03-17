@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARE BRIDGE - Video Call</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .video-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0ea5e9 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .video-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-container h1 {
+            text-align: center;
+            color: #1e3a5f;
+            margin-bottom: 1.5rem;
+        }
+
+        .camera-preview {
+            width: 100%;
+            height: 400px;
+            background: #1e3a5f;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .camera-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-preview .placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+        }
+
+        .camera-preview .placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .video-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .video-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .video-btn-active {
+            background: #10b981;
+            color: white;
+        }
+
+        .video-btn-inactive {
+            background: #ef4444;
+            color: white;
+        }
+
+        .start-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .start-btn:hover {
+            background: #0284c7;
+        }
+
+        .status-text {
+            text-align: center;
+            color: #64748b;
+            margin-top: 1rem;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+    <div class="video-page">
+        <div class="video-container">
+            <h1><i class="fas fa-video"></i> Video Call</h1>
+            <div class="camera-preview">
+                <video id="cameraFeed" autoplay playsinline muted></video>
+                <div class="placeholder" id="cameraPlaceholder">
+                    <i class="fas fa-camera"></i>
+                    <p>Click "Start Camera" to enable your camera</p>
+                </div>
+            </div>
+            <div class="video-controls">
+                <button class="video-btn video-btn-active" id="muteBtn" onclick="toggleMute()" title="Mute"><i
+                        class="fas fa-microphone"></i></button>
+                <button class="video-btn video-btn-active" id="cameraBtn" onclick="toggleCamera()" title="Camera"><i
+                        class="fas fa-video"></i></button>
+            </div>
+            <button class="start-btn" id="startBtn" onclick="startCamera()"><i class="fas fa-power-off"></i> Start
+                Camera</button>
+            <p class="status-text" id="statusText">Camera is off</p>
+        </div>
+    </div>
+    <script>
+        let stream = null;
+        let isMuted = false;
+        let isCameraOff = false;
+        async function startCamera() {
+            const video = document.getElementById('cameraFeed');
+            const placeholder = document.getElementById('cameraPlaceholder');
+            const startBtn = document.getElementById('startBtn');
+            const statusText = document.getElementById('statusText');
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                video.srcObject = stream;
+                placeholder.style.display = 'none';
+                video.style.display = 'block';
+                startBtn.innerHTML = '<i class="fas fa-stop"></i> Stop Camera';
+                startBtn.onclick = stopCamera;
+                startBtn.style.background = '#ef4444';
+                statusText.textContent = 'Camera is active - You can see yourself!';
+                console.log('Camera started successfully');
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                statusText.textContent = 'Error: Could not access camera. Please allow camera permissions.';
+                alert('Could not access camera. Please ensure you have granted camera permissions.');
+            }
+        }
+        function stopCamera() {
+            if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
+            const video = document.getElementById('cameraFeed');
+            const placeholder = document.getElementById('cameraPlaceholder');
+            const startBtn = document.getElementById('startBtn');
+            const statusText = document.getElementById('statusText');
+            video.srcObject = null;
+            placeholder.style.display = 'block';
+            startBtn.innerHTML = '<i class="fas fa-power-off"></i> Start Camera';
+            startBtn.onclick = startCamera;
+            startBtn.style.background = '#0ea5e9';
+            statusText.textContent = 'Camera is off';
+        }
+        function toggleMute() {
+            if (stream) {
+                const audioTrack = stream.getAudioTracks()[0];
+                if (audioTrack) {
+                    audioTrack.enabled = isMuted;
+                    isMuted = !isMuted;
+                    const muteBtn = document.getElementById('muteBtn');
+                    if (isMuted) {
+                        muteBtn.classList.remove('video-btn-active');
+                        muteBtn.classList.add('video-btn-inactive');
+                        muteBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                    } else {
+                        muteBtn.classList.remove('video-btn-inactive');
+                        muteBtn.classList.add('video-btn-active');
+                        muteBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                    }
+                }
+            }
+        }
+        function toggleCamera() {
+            if (stream) {
+                const videoTrack = stream.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.enabled = isCameraOff;
+                    isCameraOff = !isCameraOff;
+                    const cameraBtn = document.getElementById('cameraBtn');
+                    const video = document.getElementById('cameraFeed');
+                    const placeholder = document.getElementById('cameraPlaceholder');
+                    if (isCameraOff) {
+                        cameraBtn.classList.remove('video-btn-active');
+                        cameraBtn.classList.add('video-btn-inactive');
+                        cameraBtn.innerHTML = '<i class="fas fa-video-slash"></i>';
+                        video.style.display = 'none';
+                        placeholder.style.display = 'block';
+                        placeholder.querySelector('p').textContent = 'Camera is turned off';
+                    } else {
+                        cameraBtn.classList.remove('video-btn-inactive');
+                        cameraBtn.classList.add('video-btn-active');
+                        cameraBtn.innerHTML = '<i class="fas fa-video"></i>';
+                        video.style.display = 'block';
+                        placeholder.style.display = 'none';
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

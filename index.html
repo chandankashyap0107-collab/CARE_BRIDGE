@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARE BRIDGE • Connecting Care</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="script.js" defer></script>
+    <script src="location-tracking.js" defer></script>
+    <!-- Google Maps API - Replace YOUR_API_KEY with actual key for production -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"
+        onerror="console.log('Google Maps failed to load')">
+        </script>
+</head>
+
+<body>
+    <!-- ─── LANDING + NAVBAR + MODALS ──────────────────────────────────────── -->
+    <div id="landing-view">
+
+        <!-- NAVBAR -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>CARE BRIDGE</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#home" class="nav-link">Home</a></li>
+                    <li><a href="#about" class="nav-link">About</a></li>
+                    <li><a href="#features" class="nav-link">Features</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+                <div class="nav-auth">
+                    <button onclick="showLoginModal()" class="btn btn-outline">Login</button>
+                    <button onclick="showRegisterModal()" class="btn btn-primary">Sign Up</button>
+                </div>
+                <button class="hamburger" id="hamburger">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- HERO -->
+        <header id="home" class="hero">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">CARE BRIDGE</h1>
+                    <p class="hero-subtitle">Bridging the gap between compassionate caretakers and elderly loved ones
+                    </p>
+                    <p class="hero-description">
+                        A secure healthtech platform that enables real-time health monitoring,
+                        instant video calls, medication reminders, and emotional support —
+                        all in one place.
+                    </p>
+                    <div class="hero-buttons">
+                        <button onclick="showRegisterModal()" class="btn btn-primary btn-large">
+                            <i class="fas fa-user-plus"></i> Get Started Free
+                        </button>
+                        <button onclick="showLoginModal()" class="btn btn-secondary btn-large">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ABOUT / INTRODUCTION -->
+        <section id="about" class="intro-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Why CARE BRIDGE?</h2>
+                </div>
+                <div class="intro-grid">
+                    <div class="intro-card">
+                        <div class="intro-icon"><i class="fas fa-heart"></i></div>
+                        <h3>For Elderly Persons</h3>
+                        <p>Simple interface, voice commands, emergency SOS, health tracking.</p>
+                    </div>
+                    <div class="intro-card">
+                        <div class="intro-icon"><i class="fas fa-user-nurse"></i></div>
+                        <h3>For Caretakers</h3>
+                        <p>Real-time vitals, medication alerts, video visits, reports.</p>
+                    </div>
+                    <div class="intro-card">
+                        <div class="intro-icon"><i class="fas fa-mobile-alt"></i></div>
+                        <h3>Seamless & Reliable</h3>
+                        <p>Works on phones/tablets. Designed for simplicity.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div> <!-- #landing-view -->
+
+    <!-- ─── CARETAKER DASHBOARD ─────────────────────── -->
+    <div id="caretaker-dashboard-view" class="dashboard-view hidden">
+
+        <nav class="dashboard-nav">
+            <div class="dash-container" style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i> CARE BRIDGE
+                </div>
+                <div style="display:flex; align-items:center; gap:1.5rem;">
+                    <span id="caretakerName">Hello, Caretaker</span>
+                    <button onclick="showLinkModal()" class="btn btn-outline btn-small">
+                        <i class="fas fa-link"></i> Link Account
+                    </button>
+                    <button onclick="logout()" class="btn btn-outline btn-small">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="dashboard">
+            <div class="dash-container">
+                <div class="dash-header">
+                    <div>
+                        <h1 class="dash-title">Your Care Overview</h1>
+                        <p class="greeting" id="caretakerElderlyName">Select an elderly person to monitor</p>
+                    </div>
+                    <div style="display:flex; gap:1rem;">
+                        <select id="elderlySelect" onchange="loadElderlyData()" class="elderly-select">
+                            <option value="">Select Person</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="openVideoCall()"><i class="fas fa-video"></i> Video
+                            Call</button>
+                    </div>
+                </div>
+
+                <!-- Linked Account Banner -->
+                <div id="linkedBanner" class="linked-banner hidden">
+                    <i class="fas fa-link"></i>
+                    <span id="linkedStatus">Connected with: --</span>
+                </div>
+
+                <!-- SOS Alert Banner - Shows when emergency is active -->
+                <div id="sosAlertBanner" class="sos-alert-banner hidden">
+                    <div class="sos-alert-content">
+                        <i class="fas fa-exclamation-triangle sos-alert-icon"></i>
+                        <div class="sos-alert-text">
+                            <strong>SOS ALERT!</strong>
+                            <span id="sosAlertMessage">Emergency alert from your loved one</span>
+                        </div>
+                    </div>
+                    <button class="sos-alert-btn" onclick="handleSOS()">
+                        <i class="fas fa-phone"></i> Respond Now
+                    </button>
+                </div>
+
+                <!-- Alerts Section - Shows missed meals/medicines -->
+                <div id="alertsSection" class="alerts-section hidden">
+                    <h2 class="section-title">
+                        <i class="fas fa-bell" style="color: #f59e0b;"></i> Alerts & Notifications
+                    </h2>
+                    <div id="alertsContainer"></div>
+                </div>
+
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-heart" style="color:#ef4444;"></i></div>
+                        <div class="stat-value" id="heartRate">-- bpm</div>
+                        <div class="stat-label">Heart Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-tint" style="color:#3b82f6;"></i></div>
+                        <div class="stat-value" id="bloodPressure">--/--</div>
+                        <div class="stat-label">Blood Pressure</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-walking"></i></div>
+                        <div class="stat-value" id="stepsCount">--</div>
+                        <div class="stat-label">Steps Today</div>
+                    </div>
+                </div>
+
+                <!-- ─── ANALYTICS DASHBOARD ─────────────────────────── -->
+                <h2 class="section-title">
+                    <i class="fas fa-chart-line"></i> Care Analytics
+                </h2>
+                <div class="analytics-grid">
+                    <div class="analytics-card adherence-card">
+                        <div class="analytics-card-header">
+                            <div class="analytics-icon"><i class="fas fa-pills"></i></div>
+                            <div class="analytics-title">Medicine Adherence</div>
+                        </div>
+                        <div class="analytics-value" id="adherencePercentage">0%</div>
+                        <div class="analytics-subtitle">of scheduled medicines taken</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="adherenceBar"></div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card meals-card">
+                        <div class="analytics-card-header">
+                            <div class="analytics-icon"><i class="fas fa-utensils"></i></div>
+                            <div class="analytics-title">Meals Today</div>
+                        </div>
+                        <div class="analytics-value" id="mealsTodayCount">0</div>
+                        <div class="analytics-subtitle">meals logged</div>
+                        <div class="analytics-progress">
+                            <span class="badge-info" id="mealsStatus">No meals yet</span>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card upcoming-card">
+                        <div class="analytics-card-header">
+                            <div class="analytics-icon"><i class="fas fa-clock"></i></div>
+                            <div class="analytics-title">Next Medicine</div>
+                        </div>
+                        <div class="analytics-value" id="nextMedicineName">—</div>
+                        <div class="analytics-subtitle" id="nextMedicineTime">No upcoming medicines</div>
+                    </div>
+
+                    <div class="analytics-card health-card">
+                        <div class="analytics-card-header">
+                            <div class="analytics-icon"><i class="fas fa-heartbeat"></i></div>
+                            <div class="analytics-title">Health Trend</div>
+                        </div>
+                        <div class="analytics-value" id="healthTrend">—</div>
+                        <div class="analytics-subtitle" id="healthTrendDescription">Not enough data</div>
+                    </div>
+                </div>
+
+                <!-- ─── NEXT MEDICINE REMINDER ─────────────────────────── -->
+                <div id="nextMedicineDisplay"></div>
+
+                <!-- ─── NEXT MEAL REMINDER ─────────────────────────── -->
+                <div id="nextMealDisplay"></div>
+
+                <!-- ─── MEAL TRACKER SECTION ─────────────────────────── -->
+                <h2 class="section-title">
+                    <i class="fas fa-utensils"></i> Meal Tracker
+                </h2>
+                <div class="meal-tracker-section">
+                    <div class="tracker-form-card">
+                        <h3>Add Meal for Today</h3>
+                        <div class="form-group-small">
+                            <label>Meal Name</label>
+                            <input type="text" id="mealNameInput" placeholder="e.g., Breakfast, Lunch, Dinner">
+                        </div>
+                        <div class="form-group-small">
+                            <label>Time</label>
+                            <input type="time" id="mealTimeInput">
+                        </div>
+                        <div class="form-group-small">
+                            <label>Notes (optional)</label>
+                            <input type="text" id="mealNotesInput" placeholder="e.g., Prefer without salt">
+                        </div>
+                        <button onclick="addMeal()" class="btn btn-meal-tracker">
+                            <i class="fas fa-plus"></i> Add Meal
+                        </button>
+                    </div>
+                    <div class="tracker-list-card">
+                        <h3>Today's Meals</h3>
+                        <div id="mealsListContainer"></div>
+                    </div>
+                </div>
+
+                <!-- ─── MEDICINE TRACKER SECTION ─────────────────────────── -->
+                <h2 class="section-title">
+                    <i class="fas fa-pills"></i> Medicine Tracker
+                </h2>
+                <div class="medicine-tracker-section">
+                    <div class="tracker-form-card">
+                        <h3>Add Medicine to Schedule</h3>
+                        <div class="form-group-small">
+                            <label>Medicine Name</label>
+                            <input type="text" id="medicineNameInput" placeholder="e.g., Amlodipine">
+                        </div>
+                        <div class="form-group-small">
+                            <label>Dosage</label>
+                            <input type="text" id="medicineDosageInput" placeholder="e.g., 5mg">
+                        </div>
+                        <div class="form-group-small">
+                            <label>Time</label>
+                            <input type="time" id="medicineTimeInput">
+                        </div>
+                        <div class="form-group-small">
+                            <label>Frequency</label>
+                            <select id="medicineFrequencyInput">
+                                <option>Once Daily</option>
+                                <option>Twice Daily</option>
+                                <option>Three Times Daily</option>
+                                <option>As Needed</option>
+                            </select>
+                        </div>
+                        <div class="form-group-small">
+                            <label>Notes (optional)</label>
+                            <input type="text" id="medicineNotesInput" placeholder="e.g., Take with food">
+                        </div>
+                        <button onclick="addMedicine()" class="btn btn-medicine-tracker">
+                            <i class="fas fa-plus"></i> Add Medicine
+                        </button>
+                    </div>
+                    <div class="tracker-list-card">
+                        <h3>Medicine Schedule</h3>
+                        <div id="medicinesListContainer"></div>
+                    </div>
+                </div>
+
+                <!-- ─── HEALTH ENTRY SECTION ─────────────────────────── -->
+                <h2 class="section-title">
+                    <i class="fas fa-heartbeat"></i> Daily Health Entry
+                </h2>
+                <div class="health-entry-section">
+                    <div class="tracker-list-card">
+                        <h3>Health History</h3>
+                        <div id="healthEntriesListContainer"></div>
+                    </div>
+                </div>
+
+                <!-- ─── HOURLY CHECK-IN SECTION ─────────────────────────── -->
+                <h2 class="section-title">
+                    <i class="fas fa-clock"></i> Hourly Activity Reports
+                </h2>
+                <div class="hourly-checkin-section">
+                    <div class="tracker-form-card">
+                        <h3>Enable Hourly Check-in</h3>
+                        <p style="color: #64748b; margin-bottom: 1rem;">Request your elderly person to report their
+                            activity every hour</p>
+                        <div class="hourly-toggle">
+                            <label class="toggle-label">
+                                <span>Hourly Check-in</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="hourlyCheckinToggle" onchange="toggleHourlyCheckin()">
+                                    <span class="slider round"></span>
+                                </label>
+                            </label>
+                        </div>
+                        <p id="hourlyCheckinStatus" style="color: #64748b; font-size: 0.9rem; margin-top: 0.5rem;">
+                            Currently: Disabled
+                        </p>
+                    </div>
+                    <div class="tracker-list-card">
+                        <h3>Activity Reports History</h3>
+                        <div id="activityReportsListContainer">
+                            <p style="text-align: center; color: #64748b;">No activity reports yet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── LIVE LOCATION TRACKING SECTION ─────────────────────────── -->
+                <h2 class="section-title">
+                    <i class="fas fa-map-marker-alt"></i> Live Location Tracking
+                </h2>
+                <div class="location-section">
+                    <div class="tracker-form-card">
+                        <h3><i class="fas fa-map-marker-alt"></i> Elderly Location</h3>
+                        <p style="color: #64748b; margin-bottom: 1rem;">Track the real-time location of your loved one
+                        </p>
+                        <div id="caretakerElderlyLocation">
+                            <p style="text-align:center; color:#64748b; padding:20px;">
+                                <i class="fas fa-info-circle"></i> Select an elderly person above to view their
+                                location.<br>
+                                <small>They must enable location sharing from their dashboard.</small>
+                            </p>
+                        </div>
+                        <button onclick="refreshLocation()" class="btn btn-outline"
+                            style="margin-top:10px; width:100%;">
+                            <i class="fas fa-sync"></i> Refresh Location
+                        </button>
+                    </div>
+                    <div class="tracker-list-card">
+                        <h3>Location Map</h3>
+                        <div id="locationMapContainer"
+                            style="width:100%; height:300px; background:#f1f5f9; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                            <div style="text-align:center; color:#64748b;">
+                                <i class="fas fa-map" style="font-size:2rem; margin-bottom:10px;"></i>
+                                <p>Map will appear here when location is available</p>
+                            </div>
+                        </div>
+                        <div id="locationStatus" style="margin-top:10px; text-align:center;">
+                            <span class="badge badge-warning">Waiting for location...</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ─── ELDERLY DASHBOARD ───────────────────────── -->
+    <div id="elderly-dashboard-view" class="dashboard-view hidden">
+
+        <nav class="dashboard-nav">
+            <div class="dash-container" style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:1.4rem; font-weight:600;">
+                    CARE BRIDGE — <span id="greetingTime">Good Day</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <span id="elderlyName">Welcome</span>
+                    <button onclick="showLinkModal()" class="btn btn-outline btn-small">
+                        <i class="fas fa-link"></i> Link Caretaker
+                    </button>
+                    <button onclick="logout()" class="btn btn-outline btn-small">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Linked Account Banner -->
+        <div id="linkedBannerElderly" class="linked-banner hidden"
+            style="text-align:center; padding:0.5rem; background:#dbeafe; color:#1e40af;">
+            <i class="fas fa-link"></i>
+            <span id="linkedStatusElderly">Connected with caretaker</span>
+        </div>
+
+        <main class="dashboard elderly-dashboard">
+            <div class="dash-container" style="text-align:center; padding-top:2rem;">
+                <h1 style="font-size:3rem; margin-bottom:1.5rem;">How are you feeling?</h1>
+                <div class="status-large" id="moodStatus">Feeling Good!</div>
+
+                <button class="big-button big-sos" onclick="triggerEmergency()">
+                    <i class="fas fa-exclamation-triangle"></i> HELP! I need help
+                </button>
+
+                <button class="big-button big-video">
+                    <i class="fas fa-video"></i> Call my caretaker
+                </button>
+
+                <button class="big-button big-med"
+                    onclick="document.getElementById('mealTrackerTabElderly').scrollIntoView({behavior: 'smooth'})">
+                    <i class="fas fa-utensils"></i> Log my meal
+                </button>
+
+                <button class="big-button big-med"
+                    onclick="document.getElementById('medicineTrackerTabElderly').scrollIntoView({behavior: 'smooth'})">
+                    <i class="fas fa-pills"></i> I took my medicine
+                </button>
+
+                <button class="big-button" style="background:#10b981; color:white;"
+                    onclick="document.getElementById('healthEntryTabElderly').scrollIntoView({behavior: 'smooth'})">
+                    <i class="fas fa-heartbeat"></i> Record my health
+                </button>
+
+                <!-- ─── MEAL TRACKER FOR ELDERLY ─────────────────────────── -->
+                <div id="mealTrackerTabElderly" style="margin-top: 3rem; text-align: left;">
+                    <h2 class="section-title" style="text-align: center;">
+                        <i class="fas fa-utensils"></i> Meal Tracker
+                    </h2>
+                    <div class="tracker-list-card">
+                        <h3>Today's Meals</h3>
+                        <div id="mealsListContainerElderly"></div>
+                    </div>
+                </div>
+
+                <!-- ─── MEDICINE TRACKER FOR ELDERLY ─────────────────────────── -->
+                <div id="medicineTrackerTabElderly" style="margin-top: 3rem; text-align: left;">
+                    <h2 class="section-title" style="text-align: center;">
+                        <i class="fas fa-pills"></i> Medicine Schedule
+                    </h2>
+                    <div class="tracker-list-card">
+                        <h3>Your Medicines Today</h3>
+                        <div id="medicinesListContainerElderly"></div>
+                    </div>
+                </div>
+
+                <!-- ─── HEALTH ENTRY FOR ELDERLY ─────────────────────────── -->
+                <div id="healthEntryTabElderly" style="margin-top: 3rem; text-align: left;">
+                    <h2 class="section-title" style="text-align: center;">
+                        <i class="fas fa-heartbeat"></i> Health Records
+                    </h2>
+                    <div class="tracker-form-card">
+                        <h3>Record Health Information</h3>
+                        <div class="form-group-small">
+                            <label>Entry Type</label>
+                            <select id="healthEntryTypeInput">
+                                <option>General</option>
+                                <option>Symptom</option>
+                                <option>Sleep</option>
+                                <option>Activity</option>
+                                <option>Mood</option>
+                            </select>
+                        </div>
+                        <div class="form-group-small">
+                            <label>Title</label>
+                            <input type="text" id="healthEntryTitleInput" placeholder="e.g., Felt dizzy this morning">
+                        </div>
+                        <div class="form-group-small">
+                            <label>Description (optional)</label>
+                            <textarea id="healthEntryDescriptionInput" placeholder="Additional details..."
+                                rows="3"></textarea>
+                        </div>
+                        <div class="form-group-small">
+                            <label>Mood</label>
+                            <select id="healthEntryMoodInput">
+                                <option>Great</option>
+                                <option>Good</option>
+                                <option>Normal</option>
+                                <option>Tired</option>
+                                <option>Unwell</option>
+                            </select>
+                        </div>
+                        <button onclick="addHealthEntry()" class="btn btn-health-tracker">
+                            <i class="fas fa-plus"></i> Save Entry
+                        </button>
+                    </div>
+                    <div class="tracker-list-card">
+                        <h3>Recent Health Entries</h3>
+                        <div id="healthEntriesListContainerElderly"></div>
+                    </div>
+                </div>
+
+                <!-- ─── ACTIVITY REPORT SECTION FOR ELDERLY ─────────────────────────── -->
+                <div id="activityReportTabElderly" style="margin-top: 3rem; text-align: left;">
+                    <h2 class="section-title" style="text-align: center;">
+                        <i class="fas fa-clock"></i> Report Activity
+                    </h2>
+                    <div class="tracker-form-card">
+                        <h3>What have you been doing?</h3>
+                        <div class="form-group-small">
+                            <label>Activity</label>
+                            <select id="activityReportInput">
+                                <option>Watching TV</option>
+                                <option>Reading</option>
+                                <option>Resting/Sleeping</option>
+                                <option>Light Exercise</option>
+                                <option>Walking</option>
+                                <option>Eating</option>
+                                <option>Talking with family</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group-small">
+                            <label>Notes (optional)</label>
+                            <textarea id="activityNotesInput" placeholder="Any additional details..."
+                                rows="2"></textarea>
+                        </div>
+                        <button onclick="submitActivityReport()" class="btn btn-health-tracker">
+                            <i class="fas fa-check"></i> Report Activity
+                        </button>
+                    </div>
+                    <div class="tracker-list-card">
+                        <h3>My Activity History</h3>
+                        <div id="activityReportsListContainerElderly">
+                            <p style="text-align: center; color: #64748b;">No activity reports yet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── LOCATION SHARING SECTION FOR ELDERLY ─────────────────────────── -->
+                <div id="locationTabElderly" style="margin-top: 3rem; text-align: left;">
+                    <h2 class="section-title" style="text-align: center;">
+                        <i class="fas fa-map-marker-alt"></i> Location Sharing
+                    </h2>
+                    <div class="tracker-form-card">
+                        <h3>Share Your Location</h3>
+                        <p style="color: #64748b; margin-bottom: 1rem;">Allow your caretaker to see your current
+                            location</p>
+                        <div class="hourly-toggle">
+                            <label class="toggle-label">
+                                <span>Location Sharing</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="locationSharingToggle"
+                                        onchange="toggleLocationSharing()">
+                                    <span class="slider round"></span>
+                                </label>
+                            </label>
+                        </div>
+                        <p id="locationSharingStatus" style="color: #64748b; font-size: 0.9rem; margin-top: 0.5rem;">
+                            Currently: Disabled
+                        </p>
+                        <button onclick="requestLocationPermission()" class="btn btn-primary"
+                            style="margin-top:1rem; width:100%;">
+                            <i class="fas fa-map-marker-alt"></i> Enable Location Now
+                        </button>
+                    </div>
+                    <div class="tracker-list-card">
+                        <h3>My Current Location</h3>
+                        <div id="elderlyLocationDisplay">
+                            <p style="text-align:center; color:#64748b; padding:20px;">
+                                <i class="fas fa-map-marker-alt" style="font-size:1.5rem;"></i><br>
+                                Location not enabled yet
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="logout()" class="big-button" style="background:#6b7280; color:white; margin-top:3rem;">
+                    <i class="fas fa-home"></i> Logout
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- ─── ROLE MODAL ──────────────────────────────────────────────────────── -->
+    <div id="roleModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('roleModal')">×</button>
+            <h2 class="modal-title">Who are you?</h2>
+            <p class="modal-subtitle">Choose your role to continue</p>
+
+            <div class="role-grid">
+                <div class="role-card" onclick="selectRole('caretaker')">
+                    <div class="role-icon"><i class="fas fa-user-nurse"></i></div>
+                    <h3>Caretaker</h3>
+                    <p>Family or professional</p>
+                    <span class="role-btn">Continue →</span>
+                </div>
+
+                <div class="role-card" onclick="selectRole('elderly')">
+                    <div class="role-icon"><i class="fas fa-user"></i></div>
+                    <h3>Elderly Person</h3>
+                    <p>Senior receiving care</p>
+                    <span class="role-btn">Continue →</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── LOGIN MODAL ──────────────────────────────────────────────────────── -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content auth-modal">
+            <button class="modal-close" onclick="closeModal('loginModal')">×</button>
+            <h2>Login to CARE BRIDGE</h2>
+
+            <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+
+            <p style="text-align:center; margin-top:1rem;">
+                Don't have an account?
+                <a href="#" onclick="closeModal('loginModal'); showRegisterModal();" style="color:#0ea5e9;">Sign Up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ─── REGISTER MODAL ──────────────────────────────────────────────────────── -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content auth-modal">
+            <button class="modal-close" onclick="closeModal('registerModal')">×</button>
+            <h2>Create Account</h2>
+
+            <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="registerName" placeholder="Full Name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone (optional)</label>
+                    <input type="tel" id="registerPhone" placeholder="+91 9876543210">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="registerPassword" placeholder="••••••••" required>
+                </div>
+                <div class="form-group">
+                    <label>I am a...</label>
+                    <select id="registerRole" required>
+                        <option value="">Select Role</option>
+                        <option value="caretaker">Caretaker (Family/Professional)</option>
+                        <option value="elderly">Elderly Person</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+
+            <p style="text-align:center; margin-top:1rem;">
+                Already have an account?
+                <a href="#" onclick="closeModal('registerModal'); showLoginModal();" style="color:#0ea5e9;">Login</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ─── LINK ACCOUNT MODAL ──────────────────────────────────────────────────────── -->
+    <div id="linkModal" class="modal">
+        <div class="modal-content auth-modal">
+            <button class="modal-close" onclick="closeModal('linkModal')">×</button>
+            <h2><i class="fas fa-link"></i> Link Account</h2>
+
+            <div id="myLinkCodeSection">
+                <p style="text-align:center; margin-bottom:1rem;">Your Linking Code:</p>
+                <div style="text-align:center; margin-bottom:1rem;">
+                    <span id="myLinkingCode"
+                        style="font-size:2rem; font-weight:bold; color:#0ea5e9; letter-spacing:4px;">------</span>
+                </div>
+                <p style="text-align:center; color:#64748b; font-size:0.9rem; margin-bottom:1.5rem;">
+                    Share this code with your caretaker/elderly person to link accounts
+                </p>
+                <button onclick="regenerateCode()" class="btn btn-outline w-full" style="margin-bottom:1.5rem;">
+                    <i class="fas fa-sync"></i> Generate New Code
+                </button>
+            </div>
+
+            <hr style="margin:1.5rem 0; border:none; border-top:1px solid #e2e8f0;">
+
+            <p style="text-align:center; margin-bottom:1rem;">Or enter a code to link:</p>
+            <div class="form-group">
+                <label>Enter Linking Code</label>
+                <input type="text" id="linkCodeInput" placeholder="XXXXXX"
+                    style="text-transform:uppercase; letter-spacing:4px; text-align:center; font-size:1.2rem;">
+            </div>
+            <button onclick="linkAccount()" class="btn btn-primary w-full">
+                <i class="fas fa-link"></i> Link Account
+            </button>
+        </div>
+    </div>
+
+    <!-- ─── SYNC STATUS (Hidden by default) ───────────────────────────────── -->
+    <div id="syncStatus" class="sync-indicator hidden">
+        <i class="fas fa-sync fa-spin"></i> Syncing...
+    </div>
+
+    <!-- ─── VIDEO CALL MODAL ─────────────────────────────────────────────── -->
+    <div id="videoCallModal" class="modal">
+        <div class="modal-content video-call-modal">
+            <button class="modal-close" onclick="endVideoCall()">×</button>
+            <h2><i class="fas fa-video"></i> Video Call</h2>
+
+            <div class="video-call-container">
+                <!-- Remote video (the other person) -->
+                <div class="video-remote-container">
+                    <video id="remoteVideo" autoplay playsinline></video>
+                    <div id="remoteVideoPlaceholder" class="video-placeholder">
+                        <i class="fas fa-user"></i>
+                        <p>Waiting for other person...</p>
+                    </div>
+                </div>
+
+                <!-- Local video (self) -->
+                <div class="video-local-container">
+                    <video id="localVideo" autoplay playsinline muted></video>
+                </div>
+            </div>
+
+            <div class="video-call-controls">
+                <button id="muteBtn" class="video-btn" onclick="toggleMute()">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button id="cameraBtn" class="video-btn" onclick="toggleCamera()">
+                    <i class="fas fa-video"></i>
+                </button>
+                <button class="video-btn video-btn-end" onclick="endVideoCall()">
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+            </div>
+
+            <p id="videoCallStatus" class="video-call-status">
+                Click "Start Call" to enable your camera
+            </p>
+
+            <button id="startCallBtn" onclick="startVideoCall()" class="btn btn-primary w-full">
+                <i class="fas fa-video"></i> Start Video Call
+            </button>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Test - CARE BRIDGE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-test {
+            background: #0ea5e9;
+            color: white;
+        }
+
+        .btn-test:hover {
+            background: #06b6d4;
+            transform: translateY(-2px);
+        }
+
+        .logs {
+            margin-top: 20px;
+            text-align: left;
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            color: #404040;
+        }
+
+        /* MODAL STYLES (from main app) */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 460px;
+            position: relative;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+            animation: modalPop 0.3s ease;
+        }
+
+        @keyframes modalPop {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            color: #1e293b;
+        }
+
+        .modal-subtitle {
+            font-size: 15px;
+            color: #64748b;
+            margin: 0 0 30px 0;
+        }
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .role-card {
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .role-card:hover {
+            border-color: #0ea5e9;
+            background: #f0f9ff;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #1e293b;
+        }
+
+        .success {
+            padding: 12px;
+            background: #d1fae5;
+            color: #065f46;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .success.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CARE BRIDGE Modal Test</h1>
+    <p>Click the button below to test the modal opening:</p>
+    
+    <div class="button-group">
+        <button class="btn-test" onclick="testShowModal()">Test: Show Modal</button>
+        <button class="btn-test" onclick="testClickRole()">Test: Select Role</button>
+        <button class="btn-test" onclick="clearLogs()">Clear Logs</button>
+    </div>
+
+    <div class="success" id="successMsg">✓ Modal opened successfully!</div>
+    
+    <div class="logs">
+        <div id="logContainer"></div>
+    </div>
+</div>
+
+<!-- ROLE MODAL (exact copy from main app) -->
+<div id="roleModal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('roleModal')">×</button>
+        <h2 class="modal-title">Who are you?</h2>
+        <p class="modal-subtitle">Choose your role to continue</p>
+
+        <div class="role-grid">
+            <div class="role-card" onclick="testSelectRole('caretaker')">
+                <h3>Caretaker</h3>
+                <p>Family or professional</p>
+            </div>
+
+            <div class="role-card" onclick="testSelectRole('elderly')">
+                <h3>Elderly Person</h3>
+                <p>Senior receiving care</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addLog(message) {
+        const logContainer = document.getElementById('logContainer');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + message;
+        logContainer.appendChild(entry);
+        logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    function clearLogs() {
+        document.getElementById('logContainer').innerHTML = '';
+        addLog('Logs cleared');
+    }
+
+    function testShowModal() {
+        addLog('testShowModal() called');
+        const modal = document.getElementById('roleModal');
+        if (!modal) {
+            addLog('ERROR: roleModal element not found!');
+            return;
+        }
+        addLog('Modal element found: ' + modal.id);
+        modal.style.display = 'flex';
+        addLog('Modal display style set to: ' + modal.style.display);
+        
+        const successMsg = document.getElementById('successMsg');
+        successMsg.classList.add('show');
+        setTimeout(() => successMsg.classList.remove('show'), 3000);
+    }
+
+    function closeModal(id) {
+        addLog('closeModal("' + id + '") called');
+        const modal = document.getElementById(id);
+        if (!modal) {
+            addLog('ERROR: Modal with id "' + id + '" not found!');
+            return;
+        }
+        modal.style.display = 'none';
+        addLog('Modal "' + id + '" closed');
+    }
+
+    function testSelectRole(role) {
+        addLog('Role selected: ' + role);
+        closeModal('roleModal');
+    }
+
+    function testClickRole() {
+        addLog('testClickRole() - simulating role card click');
+        testSelectRole('caretaker');
+    }
+
+    // Initialize
+    window.addEventListener('load', function() {
+        addLog('Page loaded successfully');
+        addLog('Modal element: ' + (document.getElementById('roleModal') ? 'FOUND' : 'NOT FOUND'));
+    });
+</script>
+
+</body>
+</html>

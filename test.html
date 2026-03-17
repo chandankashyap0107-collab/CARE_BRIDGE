@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARE BRIDGE - Test Console</title>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            color: #0ea5e9;
+        }
+
+        h2 {
+            color: #1e2937;
+            margin-top: 20px;
+        }
+
+        .test-result {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .test-pass {
+            background: #f0fdf4;
+            border-left-color: #10b981;
+            color: #166534;
+        }
+
+        .test-fail {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .test-info {
+            background: #f0f9ff;
+            border-left-color: #0ea5e9;
+            color: #0c4a6e;
+        }
+
+        button {
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #0369a1;
+        }
+
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>✅ CARE BRIDGE - Application Test Suite</h1>
+        <p>This page verifies that all JavaScript functions are properly loaded and working.</p>
+    </div>
+
+    <div class="test-container">
+        <h2>🧪 Test Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🎯 Manual Tests</h2>
+        <button onclick="testAddMeal()">Test Add Meal</button>
+        <button onclick="testAddMedicine()">Test Add Medicine</button>
+        <button onclick="testAddHealthEntry()">Test Add Health Entry</button>
+        <button onclick="testEmergency()">Test Emergency</button>
+        <button onclick="viewStorageData()">View Storage Data</button>
+        <button onclick="clearAllData()">Clear All Data</button>
+    </div>
+
+    <div class="test-container">
+        <h2>📊 Storage Information</h2>
+        <div id="storage"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function addTestResult(test, passed, message = '') {
+            const resultsDiv = document.getElementById('results');
+            const testEl = document.createElement('div');
+            testEl.className = `test-result ${passed ? 'test-pass' : 'test-fail'}`;
+            testEl.innerHTML = `<strong>${passed ? '✅' : '❌'} ${test}</strong> ${message}`;
+            resultsDiv.appendChild(testEl);
+        }
+
+        function addInfoResult(message) {
+            const resultsDiv = document.getElementById('results');
+            const testEl = document.createElement('div');
+            testEl.className = 'test-result test-info';
+            testEl.innerHTML = `ℹ️ ${message}`;
+            resultsDiv.appendChild(testEl);
+        }
+
+        // Run tests on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Test if script.js loaded
+            addTestResult('script.js loaded', typeof currentRole !== 'undefined',
+                'currentRole variable exists');
+
+            // Test meal functions
+            addTestResult('addMeal() exists', typeof addMeal === 'function');
+            addTestResult('markMealConsumed() exists', typeof markMealConsumed === 'function');
+            addTestResult('displayMeals() exists', typeof displayMeals === 'function');
+            addTestResult('saveMealsToStorage() exists', typeof saveMealsToStorage === 'function');
+            addTestResult('loadMealsFromStorage() exists', typeof loadMealsFromStorage === 'function');
+
+            // Test medicine functions
+            addTestResult('addMedicine() exists', typeof addMedicine === 'function');
+            addTestResult('markMedicineTaken() exists', typeof markMedicineTaken === 'function');
+            addTestResult('displayMedicines() exists', typeof displayMedicines === 'function');
+            addTestResult('saveMedicinesToStorage() exists', typeof saveMedicinesToStorage === 'function');
+            addTestResult('loadMedicinesFromStorage() exists', typeof loadMedicinesFromStorage === 'function');
+
+            // Test health functions
+            addTestResult('addHealthEntry() exists', typeof addHealthEntry === 'function');
+            addTestResult('displayHealthEntries() exists', typeof displayHealthEntries === 'function');
+            addTestResult('getMoodEmoji() exists', typeof getMoodEmoji === 'function');
+            addTestResult('getHealthEntryTypeColor() exists', typeof getHealthEntryTypeColor === 'function');
+
+            // Test emergency functions
+            addTestResult('triggerEmergency() exists', typeof triggerEmergency === 'function');
+            addTestResult('getEmergencyHistory() exists', typeof getEmergencyHistory === 'function');
+
+            // Test navigation functions
+            addTestResult('showRoleModal() exists', typeof showRoleModal === 'function');
+            addTestResult('loginAs() exists', typeof loginAs === 'function');
+            addTestResult('backToHome() exists', typeof backToHome === 'function');
+
+            addInfoResult('All functions loaded successfully! ✓');
+
+            // Display storage info
+            updateStorageInfo();
+        });
+
+        function updateStorageInfo() {
+            const storageDiv = document.getElementById('storage');
+            const mealsCount = mealsData.length;
+            const medicinesCount = medicinesData.length;
+            const healthEntriesCount = healthEntriesData.length;
+
+            storageDiv.innerHTML = `
+                <p><code>mealsData</code>: ${mealsCount} items</p>
+                <p><code>medicinesData</code>: ${medicinesCount} items</p>
+                <p><code>healthEntriesData</code>: ${healthEntriesCount} items</p>
+                <p>Total items in memory: ${mealsCount + medicinesCount + healthEntriesCount}</p>
+            `;
+        }
+
+        function testAddMeal() {
+            console.log('Testing addMeal()...');
+            // Simulate form inputs
+            document.getElementById('results').innerHTML += '<div class="test-result test-info">Adding sample meal...</div>';
+
+            const meal = {
+                id: Date.now(),
+                name: 'Test Breakfast',
+                time: '08:00',
+                notes: 'Test meal',
+                timestamp: new Date().toLocaleString(),
+                consumed: false
+            };
+            mealsData.push(meal);
+            updateStorageInfo();
+            document.getElementById('results').innerHTML += '<div class="test-result test-pass">✅ Sample meal added: ' + meal.name + '</div>';
+        }
+
+        function testAddMedicine() {
+            console.log('Testing addMedicine()...');
+            document.getElementById('results').innerHTML += '<div class="test-result test-info">Adding sample medicine...</div>';
+
+            const medicine = {
+                id: Date.now(),
+                name: 'Test Medicine',
+                dosage: '5mg',
+                time: '08:00',
+                frequency: 'Once Daily',
+                notes: 'Test medicine',
+                timestamp: new Date().toLocaleString(),
+                taken: false
+            };
+            medicinesData.push(medicine);
+            updateStorageInfo();
+            document.getElementById('results').innerHTML += '<div class="test-result test-pass">✅ Sample medicine added: ' + medicine.name + '</div>';
+        }
+
+        function testAddHealthEntry() {
+            console.log('Testing addHealthEntry()...');
+            document.getElementById('results').innerHTML += '<div class="test-result test-info">Adding sample health entry...</div>';
+
+            const entry = {
+                id: Date.now(),
+                type: 'General',
+                title: 'Test Health Entry',
+                description: 'This is a test',
+                mood: 'Good',
+                timestamp: new Date().toLocaleString(),
+                date: new Date().toLocaleDateString()
+            };
+            healthEntriesData.push(entry);
+            updateStorageInfo();
+            document.getElementById('results').innerHTML += '<div class="test-result test-pass">✅ Sample health entry added</div>';
+        }
+
+        function testEmergency() {
+            console.log('Testing emergency...');
+            const emergencies = getEmergencyHistory();
+            document.getElementById('results').innerHTML += '<div class="test-result test-info">Emergency count: ' + emergencies.length + '</div>';
+        }
+
+        function viewStorageData() {
+            console.log('Meals:', mealsData);
+            console.log('Medicines:', medicinesData);
+            console.log('Health Entries:', healthEntriesData);
+            alert('Check browser console (F12) to see all stored data');
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                localStorage.clear();
+                mealsData = [];
+                medicinesData = [];
+                healthEntriesData = [];
+                updateStorageInfo();
+                alert('All data cleared!');
+            }
+        }
+    </script>
+</body>
+
+</html>

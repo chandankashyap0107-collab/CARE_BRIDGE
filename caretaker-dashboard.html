@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CARE BRIDGE • Caretaker Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="dashboard-nav">
+        <div class="dash-container"
+            style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i> CARE BRIDGE
+            </div>
+            <div style="display:flex; align-items:center; gap:1.5rem;">
+                <span>Hello, Priya</span>
+                <button class="btn btn-outline" onclick="alert('Logging out...')">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+
+        <div class="dash-container">
+
+            <div class="dash-header">
+                <div>
+                    <h1 class="dash-title">Your Care Overview</h1>
+                    <p class="greeting">Monitoring → Mother (Lakshmi, 78)</p>
+                </div>
+                <button class="btn btn-primary">Start Video Call</button>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-heart" style="color:#ef4444;"></i></div>
+                    <div class="stat-value">78 bpm</div>
+                    <div class="stat-label">Heart Rate • 2 min ago</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-tint" style="color:#3b82f6;"></i></div>
+                    <div class="stat-value">118/76</div>
+                    <div class="stat-label">Blood Pressure • Today 8:40 AM</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-walking"></i></div>
+                    <div class="stat-value">4,210</div>
+                    <div class="stat-label">Steps Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-exclamation-triangle" style="color:#f59e0b;"></i></div>
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">Pending Medications</div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Today's Medication Schedule</h2>
+            <div class="med-list">
+                <div class="med-item">
+                    <div>Amlodipine 5mg (Blood Pressure)</div>
+                    <div class="med-time">8:00 AM — Taken</div>
+                </div>
+                <div class="med-item">
+                    <div>Metformin 500mg (Diabetes)</div>
+                    <div class="med-time">1:00 PM — Due soon</div>
+                </div>
+                <div class="med-item">
+                    <div>Atorvastatin 20mg (Cholesterol)</div>
+                    <div class="med-time">8:00 PM — Upcoming</div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Recent Alerts & Notes</h2>
+            <div class="alert-list">
+                <div class="alert-item">
+                    <div>Blood pressure slightly elevated this morning</div>
+                    <div><span class="status-badge status-warning">Warning</span></div>
+                </div>
+                <div class="alert-item">
+                    <div>Fell asleep during afternoon check-in call</div>
+                    <div><span class="status-badge status-normal">Info</span></div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Vitals Trends (Last 7 Days)</h2>
+            <div class="vitals-grid">
+                <div class="vital-card">
+                    <div class="vital-header">
+                        <div class="vital-title">Heart Rate</div>
+                        <span class="status-badge status-normal">Normal</span>
+                    </div>
+                    <p style="color:#64748b; font-size:0.95rem;">Average 74 bpm • Range 62–88</p>
+                    <!-- In real app → Chart.js or similar -->
+                    <div
+                        style="height:140px; background:#f1f5f9; border-radius:8px; margin-top:1rem; display:flex; align-items:center; justify-content:center;">
+                        [Heart rate line chart placeholder]
+                    </div>
+                </div>
+                <!-- More cards: BP, Activity, Sleep, etc. -->
+            </div>
+
+        </div>
+    </main>
+
+</body>
+
+</html>
