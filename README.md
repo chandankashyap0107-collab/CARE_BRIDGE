@@ -2,7 +2,7 @@
 
 **A secure, user-friendly health monitoring platform connecting caregivers and elderly loved ones.**
 
-# PROJECT URL: https://eshani0109.github.io/NEPTUNE-SPEAR/
+# PROJECT URL: https://chandankashyap0107.github.io/NEPTUNE-SPEAR/
 
 ## 📖 Overview
 
